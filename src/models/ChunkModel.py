@@ -1,3 +1,4 @@
+from typing import Any
 from .BaseModel import BaseModel
 from configs import DatabaseConfig
 from .data_schemas import Chunk
@@ -6,8 +7,12 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 
 
 class ChunkModel(BaseModel):
-    def __init__(self, db_client: AsyncIOMotorDatabase) -> None:
-        super().__init__(db_client)
+    def __init__(
+        self,
+        db_client: AsyncIOMotorDatabase | None = None,
+        vectordb_client: Any | None = None,
+    ) -> None:
+        super().__init__(db_client, vectordb_client)
         collection_name = DatabaseConfig.CHUNK_COLLECTION_NAME.value
         self.collection = self.db_client[collection_name]
 
