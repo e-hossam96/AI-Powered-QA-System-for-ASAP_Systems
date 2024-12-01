@@ -18,13 +18,13 @@ class ChunkModel(BaseModel):
         chunk.id = result.inserted_id
         return chunk
 
-    async def get_all_chunks(self) -> list[Chunk]:
-        cursor = self.collection.find({})
-        assets = []
-        async for record in cursor:
-            asset = Chunk(**record)
-            assets.append(asset)
-        return assets
+    # async def get_all_chunks(self) -> list[Chunk]:
+    #     cursor = self.collection.find({})
+    #     assets = []
+    #     async for record in cursor:
+    #         asset = Chunk(**record)
+    #         assets.append(asset)
+    #     return assets
 
     async def clear_all_chunks(self) -> int:
         result = await self.collection.delete_many({})
@@ -44,3 +44,16 @@ class ChunkModel(BaseModel):
             ]
             await self.collection.bulk_write(batch_operations)
         return num_chunks
+
+    async def get_all_chunks(
+        self, page_index: int = 0, page_size: int = 128
+    ) -> tuple[list[Chunk], int]:
+        num_records = await self.collection.count_documents({})
+        num_pages = num_records // page_size
+        num_pages += 1 if num_records % page_size else 0
+        cursor = self.collection.find({}).skip(page_index * page_size).limit(page_size)
+        chunks = []
+        async for record in cursor:
+            chunk = Chunk(**record)
+            chunks.append(chunk)
+        return chunks, num_pages
