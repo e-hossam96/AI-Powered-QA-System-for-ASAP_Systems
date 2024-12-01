@@ -1,32 +1,46 @@
 from .BaseModel import BaseModel
 from configs import DatabaseConfig
-from .data_schemas import Asset
+from .data_schemas import Chunk
+from pymongo import InsertOne
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 
-class AssetModel(BaseModel):
+class ChunkModel(BaseModel):
     def __init__(self, db_client: AsyncIOMotorDatabase) -> None:
         super().__init__(db_client)
-        collection_name = DatabaseConfig.ASSET_COLLECTION_NAME.value
+        collection_name = DatabaseConfig.CHUNK_COLLECTION_NAME
         self.collection = self.db_client[collection_name]
 
-    async def push_asset_to_db(self, asset: Asset) -> Asset:
+    async def push_chunk_to_db(self, chunk: Chunk) -> Chunk:
         result = await self.collection.insert_one(
-            asset.model_dump(by_alias=True, exclude_none=True)
+            chunk.model_dump(by_alias=True, exclude_none=True)
         )
-        asset.id = result.inserted_id
-        return asset
+        chunk.id = result.inserted_id
+        return chunk
 
-    # async def get_asset_by_name(self, name: str) -> Asset | None:
-    #     record = await self.collection.find_one(filter={"name": name})
-    #     if record:
-    #         record = Asset(**record)
-    #     return record
-
-    async def get_all_assets(self) -> list[Asset]:
+    async def get_all_chunks(self) -> list[Chunk]:
         cursor = self.collection.find({})
         assets = []
         async for record in cursor:
-            asset = Asset(**record)
+            asset = Chunk(**record)
             assets.append(asset)
         return assets
+
+    async def clear_all_chunks(self) -> int:
+        result = await self.collection.delete_many({})
+        return result.deleted_count
+
+    async def batch_push_chunks_to_db(
+        self, chunks: list[Chunk], batch_size: int = 64
+    ) -> int:
+        num_chunks = len(chunks)
+        # implement batch operations
+        for i in range(0, num_chunks, batch_size):
+            batch_chunks = chunks[i : i + batch_size]
+            # create operations
+            batch_operations = [
+                InsertOne(chunk.model_dump(by_alias=True, exclude_none=True))
+                for chunk in batch_chunks
+            ]
+            await self.collection.bulk_write(batch_operations)
+        return num_chunks
