@@ -1,9 +1,10 @@
-from models import AssetModel
-from models.data_schemas import Asset
-from controllers import AssetController
+from models import AssetModel, ChunkModel
+from models.data_schemas import Asset, Chunk
+from controllers import AssetController, ChunkController
 from configs import ResponseConfig
 from fastapi.responses import JSONResponse
 from fastapi import APIRouter, Request, UploadFile, status
+from .route_schemas import ProcessingConfig
 
 
 data_router = APIRouter(prefix="/data", tags=["data"])
@@ -52,8 +53,38 @@ async def push_asset_to_db(
 
 
 @data_router.post("/process")
-async def process_asset_text_into_chunks() -> JSONResponse:
-    pass
+async def process_asset_text_into_chunks(
+    request: Request, processing_config: ProcessingConfig
+) -> JSONResponse:
+    asset_model = AssetModel(request.app.db_client)
+    chunk_model = ChunkModel(request.app.db_client)
+    chunk_controller = ChunkController()
+    if processing_config.do_reset:
+        _ = await chunk_model.clear_all_chunks()
+    # get all assets from db
+    # should be small number relative to chunks
+    assets = await asset_model.get_all_assets()
+    if len(assets) == 0:
+        return JSONResponse(
+            content={"message": ResponseConfig.DB_NO_ASSETS.value},
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
+    # processing all assets and pushing them to db
+    for asset in assets:
+        asset_path = chunk_controller.get_asset_path(asset.name)
+        asset_content = chunk_controller.get_unstructured_asset_content(asset_path)
+        asset_chunks = chunk_controller.process_unstructured_asset_content(
+            asset_content, processing_config.chunk_size, processing_config.overlap_size
+        )
+        asset_chunks = [
+            Chunk(text=c.page_content, source_name=asset.name, source_id=asset.id)
+            for c in asset_chunks
+        ]
+        _ = await chunk_model.batch_push_chunks_to_db(asset_chunks)
+    return JSONResponse(
+        content={"message": ResponseConfig.DB_PROCESSED_ALL_ASSETS.value},
+        status_code=status.HTTP_200_OK,
+    )
 
 
 @data_router.get("/info/{collection_name}")
