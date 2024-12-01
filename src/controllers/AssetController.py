@@ -30,8 +30,8 @@ class AssetController(BaseController):
     def get_clean_asset_name(self, name) -> str:
         return re.sub(r"\W", r".", name)
 
-    def get_unique_asset_path(self, filename: str) -> tuple[pathlib.Path, str]:
-        clean_asset_name = self.get_clean_asset_name(filename)
+    def get_unique_asset_path(self, asset_name: str) -> tuple[pathlib.Path, str]:
+        clean_asset_name = self.get_clean_asset_name(asset_name)
         prefix = self.generate_random_string()
         unique_asset_name = f"{prefix}__{clean_asset_name}"
         unique_asset_path = self.files_dir_path.joinpath(unique_asset_name)
