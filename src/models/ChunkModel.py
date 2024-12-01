@@ -11,12 +11,12 @@ class ChunkModel(BaseModel):
         collection_name = DatabaseConfig.CHUNK_COLLECTION_NAME
         self.collection = self.db_client[collection_name]
 
-    async def push_chunk_to_db(self, chunk: Chunk) -> Chunk:
-        result = await self.collection.insert_one(
-            chunk.model_dump(by_alias=True, exclude_none=True)
-        )
-        chunk.id = result.inserted_id
-        return chunk
+    # async def push_chunk_to_db(self, chunk: Chunk) -> Chunk:
+    #     result = await self.collection.insert_one(
+    #         chunk.model_dump(by_alias=True, exclude_none=True)
+    #     )
+    #     chunk.id = result.inserted_id
+    #     return chunk
 
     # async def get_all_chunks(self) -> list[Chunk]:
     #     cursor = self.collection.find({})
