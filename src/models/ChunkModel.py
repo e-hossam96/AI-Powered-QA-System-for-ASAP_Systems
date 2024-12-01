@@ -9,7 +9,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 class ChunkModel(BaseModel):
     def __init__(
         self,
-        db_client: AsyncIOMotorDatabase | None = None,
+        db_client: AsyncIOMotorDatabase,
         vectordb_client: Any | None = None,
     ) -> None:
         super().__init__(db_client, vectordb_client)
