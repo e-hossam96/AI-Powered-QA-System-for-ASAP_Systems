@@ -8,7 +8,7 @@ from motor.motor_asyncio import AsyncIOMotorDatabase
 class ChunkModel(BaseModel):
     def __init__(self, db_client: AsyncIOMotorDatabase) -> None:
         super().__init__(db_client)
-        collection_name = DatabaseConfig.CHUNK_COLLECTION_NAME
+        collection_name = DatabaseConfig.CHUNK_COLLECTION_NAME.value
         self.collection = self.db_client[collection_name]
 
     # async def push_chunk_to_db(self, chunk: Chunk) -> Chunk:
