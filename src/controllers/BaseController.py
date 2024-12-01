@@ -12,3 +12,6 @@ class BaseController:
         self.vectordb_dir_path = self.base_dir_path.joinpath(
             pathlib.Path("assets").joinpath("vectordb")
         )
+        # create the needed directories
+        self.files_dir_path.mkdir(parents=True, exist_ok=True)
+        self.vectordb_dir_path.mkdir(parents=True, exist_ok=True)
