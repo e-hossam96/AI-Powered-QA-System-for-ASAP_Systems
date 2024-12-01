@@ -1,5 +1,5 @@
 from .BaseModel import BaseModel
-from config import DatabaseConfig
+from configs import DatabaseConfig
 from data_schemas import Asset
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
