@@ -1,6 +1,6 @@
 from .BaseModel import BaseModel
-from config import DatabaseConfig
-from data_schemas import Asset
+from configs import DatabaseConfig
+from .data_schemas import Asset
 from motor.motor_asyncio import AsyncIOMotorDatabase
 
 
@@ -10,9 +10,9 @@ class AssetModel(BaseModel):
         collection_name = DatabaseConfig.ASSET_COLLECTION_NAME.value
         self.collection = self.db_client[collection_name]
 
-    async def push_asset(self, asset: Asset) -> Asset:
+    async def push_asset_to_db(self, asset: Asset) -> Asset:
         result = await self.collection.insert_one(
-            asset.model_dump(by_alias=True, exclude_unset=True)
+            asset.model_dump(by_alias=True, exclude_none=True)
         )
         asset.id = result.inserted_id
         return asset

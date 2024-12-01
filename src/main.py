@@ -10,11 +10,26 @@ from routes.data import data_router
 from routes.index import index_router
 from routes.rag import rag_router
 from contextlib import asynccontextmanager
+from motor.motor_asyncio import AsyncIOMotorClient
+from helpers import get_settings, Settings
+
+
+def connect_mongo_client(
+    app: FastAPI,
+    app_settinigs,
+) -> FastAPI:
+    # get mongo connection and db client
+    app.db_connection = AsyncIOMotorClient(host=app_settinigs.MONGODB_URL)
+    app.db_client = app.db_connection[app_settinigs.MONGODB_DATABASE_NAME]
+    return app
 
 
 @asynccontextmanager
 async def connect_lifespan_clients(app: FastAPI):
+    settings = get_settings()
+    app = connect_mongo_client(app, settings)
     yield
+    app.db_connection.close()
 
 
 app = FastAPI(lifespan=connect_lifespan_clients)
