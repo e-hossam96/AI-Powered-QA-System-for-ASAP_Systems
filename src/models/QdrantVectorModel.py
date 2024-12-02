@@ -1,7 +1,8 @@
 from typing import Any
 from .BaseModel import BaseModel
-from data_schemas import Vector
+from .data_schemas import Vector
 from bson.objectid import ObjectId
+from configs import DatabaseConfig
 from qdrant_client import AsyncQdrantClient, models
 
 
@@ -16,19 +17,22 @@ class QdrantVectorModel(BaseModel):
         super().__init__(
             db_client, vectordb_client, embedding_client, generation_client
         )
+        self.collection_name = DatabaseConfig.VECTOR_COLLECTION_NAME.value
 
     async def create_collection(
         self,
-        collection_name: str,
         embedding_size: int,
         distance: models.Distance,
         do_reset: bool = False,
+        collection_name: str | None = None,
     ) -> bool:
         result = False
         if do_reset:
             _ = await self.vectordb_client.delete_collection(
                 collection_name=collection_name
             )
+        if collection_name is None:
+            collection_name = self.collection_name
         if not await self.vectordb_client.collection_exists(
             collection_name=collection_name
         ):
@@ -42,17 +46,21 @@ class QdrantVectorModel(BaseModel):
 
     async def batch_push(
         self,
-        collection_name: str,
         vectors: list[Vector],
         batch_size: int = 64,
+        collection_name: str | None = None,
     ) -> bool:
+        if collection_name is None:
+            collection_name = self.collection_name
         if not await self.vectordb_client.collection_exists(
             collection_name=collection_name
         ):
             return False
-        metadata = [v.model_dump(mode="json", exclude_none=True) for v in vectors]
+        metadata = [v.model_dump(exclude_none=True) for v in vectors]
+        for m in metadata:
+            m["source_id"] = str(m["source_id"])
         vectors = [m.pop("vector") for m in metadata]
-        await self.vectordb_client.upload_collection(
+        self.vectordb_client.upload_collection(
             collection_name=collection_name,
             vectors=vectors,
             payload=metadata,
@@ -61,15 +69,20 @@ class QdrantVectorModel(BaseModel):
         return True
 
     async def search_by_vector(
-        self, collection_name: str, vector: Vector, limit: int = 4
+        self,
+        vector: Vector,
+        limit: int = 4,
+        collection_name: str | None = None,
     ) -> list[Vector]:
         records = []
+        if collection_name is None:
+            collection_name = self.collection_name
         if await self.vectordb_client.collection_exists(
             collection_name=collection_name
         ):
             result = await self.vectordb_client.search(
                 collection_name=collection_name,
-                query_vector=vector,
+                query_vector=vector.vector,
                 limit=limit,
             )
         if result is not None:

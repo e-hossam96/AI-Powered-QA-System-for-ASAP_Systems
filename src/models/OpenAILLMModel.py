@@ -51,7 +51,7 @@ class OpenAILLMModel(BaseModel):
             return None
         # send text to embedding endpoint
         resp = await self.embedding_client.embeddings.create(
-            model=self.embedding_model_id, input=self.process_prompt(text)
+            model=model_name, input=text
         )
         if (
             resp is None

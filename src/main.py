@@ -13,6 +13,7 @@ from configs import VectorDBProviderConfig
 from contextlib import asynccontextmanager
 from motor.motor_asyncio import AsyncIOMotorClient
 from qdrant_client import AsyncQdrantClient
+from openai import AsyncOpenAI
 from helpers import get_settings, Settings
 
 
@@ -36,11 +37,35 @@ def connect_vectordb_client(
     return app
 
 
+def connect_generation_client(
+    app: FastAPI,
+    app_settinigs: Settings,
+) -> FastAPI:
+    app.generation_client = AsyncOpenAI(
+        api_key=app_settinigs.OPENAI_API_KEY,
+        base_url=app_settinigs.GENERATION_LLM_BASE_URL,
+    )
+    return app
+
+
+def connect_embedding_client(
+    app: FastAPI,
+    app_settinigs: Settings,
+) -> FastAPI:
+    app.embedding_client = AsyncOpenAI(
+        api_key=app_settinigs.OPENAI_API_KEY,
+        base_url=app_settinigs.EMBEDDING_LLM_BASE_URL,
+    )
+    return app
+
+
 @asynccontextmanager
 async def connect_lifespan_clients(app: FastAPI):
     settings = get_settings()
     app = connect_mongo_client(app, settings)
     app = connect_vectordb_client(app, settings)
+    app = connect_generation_client(app, settings)
+    app = connect_embedding_client(app, settings)
     yield
     app.db_connection.close()
     app.vectordb_client = None
