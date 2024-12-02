@@ -82,7 +82,7 @@ class QdrantVectorModel(BaseModel):
         ):
             result = await self.vectordb_client.search(
                 collection_name=collection_name,
-                query_vector=vector,
+                query_vector=vector.vector,
                 limit=limit,
             )
         if result is not None:
