@@ -7,6 +7,7 @@ class Vector(BaseModel):
     text: str = Field(..., min_length=1)
     source_name: str = Field(..., min_length=1)  # asset name
     source_id: ObjectId  # asset id in document db
+    score: float | None = Field(default=None, gt=0.0)
 
     class Config:
         arbitrary_types_allowed = True
