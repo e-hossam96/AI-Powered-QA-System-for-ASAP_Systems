@@ -1,6 +1,6 @@
 from typing import Any
 from .BaseModel import BaseModel
-from data_schemas import Vector
+from .data_schemas import Vector
 from bson.objectid import ObjectId
 from configs import DatabaseConfig
 from qdrant_client import AsyncQdrantClient, models
@@ -56,9 +56,11 @@ class QdrantVectorModel(BaseModel):
             collection_name=collection_name
         ):
             return False
-        metadata = [v.model_dump(mode="json", exclude_none=True) for v in vectors]
+        metadata = [v.model_dump(exclude_none=True) for v in vectors]
+        for m in metadata:
+            m["source_id"] = str(m["source_id"])
         vectors = [m.pop("vector") for m in metadata]
-        await self.vectordb_client.upload_collection(
+        self.vectordb_client.upload_collection(
             collection_name=collection_name,
             vectors=vectors,
             payload=metadata,
