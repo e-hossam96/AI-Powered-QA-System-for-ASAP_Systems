@@ -22,7 +22,9 @@ def connect_mongo_client(
     app_settinigs: Settings,
 ) -> FastAPI:
     # get mongo connection and db client
-    app.db_connection = AsyncIOMotorClient(host=app_settinigs.MONGODB_URL)
+    app.db_connection = AsyncIOMotorClient(
+        host=app_settinigs.MONGODB_HOST, port=app_settinigs.MONGODB_PORT
+    )
     app.db_client = app.db_connection[app_settinigs.MONGODB_DATABASE_NAME]
     return app
 
@@ -33,7 +35,9 @@ def connect_vectordb_client(
 ) -> FastAPI:
     app.vectordb_client = None
     if app_settinigs.VECTORDB_PROVIDER == VectorDBProviderConfig.QDRANT.value:
-        app.vectordb_client = AsyncQdrantClient(url=app_settinigs.VECTORDB_URL)
+        app.vectordb_client = AsyncQdrantClient(
+            host=app_settinigs.VECTORDB_HOST, port=app_settinigs.VECTORDB_PORT
+        )
     return app
 
 

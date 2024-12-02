@@ -4,9 +4,11 @@ from pydantic_settings import BaseSettings
 class Settings(BaseSettings):
     MONGO_ADMIN_USER: str
     MONGO_ADMIN_PASS: str
-    MONGODB_URL: str
+    MONGODB_HOST: str
+    MONGODB_PORT: int
     MONGODB_DATABASE_NAME: str
-    VECTORDB_URL: str
+    VECTORDB_HOST: str
+    VECTORDB_PORT: int
     VECTORDB_PROVIDER: str
     VECTORDB_DISTANCE: str
     ASSET_UNSTRUCTURED_ALLOWED_TYPES: list[str]
