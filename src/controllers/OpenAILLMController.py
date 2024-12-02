@@ -19,7 +19,7 @@ class OpenAILLMController(BaseController):
                 while st in prompt_tokens:
                     prompt_tokens.remove(st)
         prompt_tokens = prompt_tokens[:max_tokens]
-        return " ".join(prompt_tokens)
+        return " ".join(prompt_tokens).strip()
 
     def construct_rag_messages(
         self,
