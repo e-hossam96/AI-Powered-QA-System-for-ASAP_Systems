@@ -9,14 +9,16 @@ from routes.base import base_router
 from routes.data import data_router
 from routes.index import index_router
 from routes.rag import rag_router
+from configs import VectorDBProviderConfig
 from contextlib import asynccontextmanager
 from motor.motor_asyncio import AsyncIOMotorClient
+from qdrant_client import AsyncQdrantClient
 from helpers import get_settings, Settings
 
 
 def connect_mongo_client(
     app: FastAPI,
-    app_settinigs,
+    app_settinigs: Settings,
 ) -> FastAPI:
     # get mongo connection and db client
     app.db_connection = AsyncIOMotorClient(host=app_settinigs.MONGODB_URL)
@@ -24,12 +26,24 @@ def connect_mongo_client(
     return app
 
 
+def connect_vectordb_client(
+    app: FastAPI,
+    app_settinigs: Settings,
+) -> FastAPI:
+    app.vectordb_client = None
+    if app_settinigs.VECTORDB_PROVIDER == VectorDBProviderConfig.QDRANT.value:
+        app.vectordb_client = AsyncQdrantClient(url=app_settinigs.VECTORDB_URL)
+    return app
+
+
 @asynccontextmanager
 async def connect_lifespan_clients(app: FastAPI):
     settings = get_settings()
     app = connect_mongo_client(app, settings)
+    app = connect_vectordb_client(app, settings)
     yield
     app.db_connection.close()
+    app.vectordb_client = None
 
 
 app = FastAPI(lifespan=connect_lifespan_clients)
