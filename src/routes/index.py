@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Request, status
 from fastapi.responses import JSONResponse
-from .route_schemas import VectorIndexConfig
+from .route_schemas import VectorIndexConfig, VectorSearchConfig
 from configs import ResponseConfig, VectorDistanceConfig
 from models.data_schemas import Vector
 from models import ChunkModel, QdrantVectorModel, OpenAILLMModel
@@ -67,8 +67,37 @@ async def push_chunks_into_vector_db(
 
 
 @index_router.post("/search")
-async def search_vector_db() -> JSONResponse:
-    pass
+async def search_vector_db(
+    request: Request, search_config: VectorSearchConfig
+) -> JSONResponse:
+    app_settings = get_settings()
+    vectordb_model = QdrantVectorModel(request.app.vectordb_client)
+    embedding_model = OpenAILLMModel(embedding_client=request.app.embedding_client)
+    vector = Vector(text=search_config.text)
+    vector.vector = await embedding_model.embed_text(
+        vector.text, app_settings.EMBEDDING_LLM_MODEL_NAME
+    )
+    if vector.vector is None:
+        return JSONResponse(
+            content={"message": ResponseConfig.EMBEDDING_FAILED.value},
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
+    results = await vectordb_model.search_by_vector(vector, search_config.limit)
+    if len(results) == 0:
+        return JSONResponse(
+            content={"message": ResponseConfig.VECTORDB_SEARCH_FAILED.value},
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
+    results = [r.model_dump(exclude_none=True) for r in results]
+    for r in results:
+        r["source_id"] = str(r["source_id"])
+    return JSONResponse(
+        content={
+            "message": ResponseConfig.VECTORDB_SEARCH_SUCCEEDED.value,
+            "vectors": results,
+        },
+        status_code=status.HTTP_200_OK,
+    )
 
 
 @index_router.get("/info/{collection_name}")
