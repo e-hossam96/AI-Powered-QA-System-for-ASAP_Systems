@@ -11,3 +11,5 @@ class ResponseConfig(Enum):
     DB_PROCESSED_ALL_ASSETS: str = "processed all assets into chunks"
     EMBEDDING_FAILED: str = "failed to generate embeddings"
     VECTORDB_INDEXING_SUCCEEDED: str = "indexing vector database succeeded"
+    VECTORDB_SEARCH_SUCCEEDED: str = "searching vector database succeeded"
+    VECTORDB_SEARCH_FAILED: str = "searching vector database failed"
