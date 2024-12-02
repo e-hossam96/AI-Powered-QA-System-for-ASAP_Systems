@@ -10,8 +10,12 @@ class AssetModel(BaseModel):
         self,
         db_client: AsyncIOMotorDatabase,
         vectordb_client: Any | None = None,
+        embedding_client: Any | None = None,
+        generation_client: Any | None = None,
     ) -> None:
-        super().__init__(db_client, vectordb_client)
+        super().__init__(
+            db_client, vectordb_client, embedding_client, generation_client
+        )
         collection_name = DatabaseConfig.ASSET_COLLECTION_NAME.value
         self.collection = self.db_client[collection_name]
 
