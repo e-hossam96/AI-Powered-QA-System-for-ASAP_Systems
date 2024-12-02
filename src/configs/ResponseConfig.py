@@ -13,3 +13,5 @@ class ResponseConfig(Enum):
     VECTORDB_INDEXING_SUCCEEDED: str = "indexing vector database succeeded"
     VECTORDB_SEARCH_SUCCEEDED: str = "searching vector database succeeded"
     VECTORDB_SEARCH_FAILED: str = "searching vector database failed"
+    RAG_ANS_GENERATION_FAILED: str = "rag response generation failed"
+    RAG_ANS_GENERATION_SUCCEEDED: str = "rag response generation succeeded"
