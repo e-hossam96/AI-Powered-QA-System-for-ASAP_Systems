@@ -1,0 +1,189 @@
+{
+	"info": {
+		"_postman_id": "3fe7d01a-71e3-4aa7-82e6-309bc8299775",
+		"name": "asap",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "29543643"
+	},
+	"item": [
+		{
+			"name": "base-request",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{base_url}}",
+					"host": [
+						"{{base_url}}"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "data-push",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "formdata",
+					"formdata": [
+						{
+							"key": "asset",
+							"type": "file",
+							"src": "/C:/Users/ehhho/Downloads/papers/gpt2.pdf"
+						}
+					]
+				},
+				"url": {
+					"raw": "{{base_url}}/data/push",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"data",
+						"push"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "data-process",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"chunk_size\": 2000,\r\n    \"overlap_size\": 100,\r\n    \"do_reset\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/data/process",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"data",
+						"process"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "index-push",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"do_reset\": true\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/index/push",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"index",
+						"push"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "index-search",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"text\": \"What are the different model sizes of the GPT2 model family?\",\r\n    \"limit\": 2\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/index/search",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"index",
+						"search"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "rag-query",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"text\": \"What are the different model sizes of the GPT2 model family?\",\r\n    \"limit\": 2\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/rag/query",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"rag",
+						"query"
+					]
+				}
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"packages": {},
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "base_url",
+			"value": "http://localhost:8000",
+			"type": "string"
+		}
+	]
+}
