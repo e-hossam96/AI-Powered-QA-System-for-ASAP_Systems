@@ -44,3 +44,20 @@ class OpenAILLMModel(BaseModel):
         ):
             return None
         return resp.choices[0].message.content
+
+    async def embed_text(self, text: str, model_name: str) -> list[float] | None:
+        # ensure client is set
+        if self.embedding_client is None:
+            return None
+        # send text to embedding endpoint
+        resp = await self.embedding_client.embeddings.create(
+            model=self.embedding_model_id, input=self.process_prompt(text)
+        )
+        if (
+            resp is None
+            or resp.data is None
+            or len(resp.data) == 0
+            or resp.data[0].embedding is None
+        ):
+            return None
+        return resp.data[0].embedding
