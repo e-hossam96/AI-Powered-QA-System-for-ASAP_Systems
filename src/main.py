@@ -12,7 +12,7 @@ from routes.rag import rag_router
 from configs import VectorDBProviderConfig
 from contextlib import asynccontextmanager
 from motor.motor_asyncio import AsyncIOMotorClient
-from qdrant_client import QdrantClient
+from qdrant_client import AsyncQdrantClient
 from helpers import get_settings, Settings
 
 
@@ -32,7 +32,7 @@ def connect_vectordb_client(
 ) -> FastAPI:
     app.vectordb_client = None
     if app_settinigs.VECTORDB_PROVIDER == VectorDBProviderConfig.QDRANT.value:
-        app.vectordb_client = QdrantClient(url=app_settinigs.VECTORDB_URL)
+        app.vectordb_client = AsyncQdrantClient(url=app_settinigs.VECTORDB_URL)
     return app
 
 
