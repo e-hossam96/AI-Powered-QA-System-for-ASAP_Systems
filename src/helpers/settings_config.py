@@ -26,6 +26,8 @@ class Settings(BaseSettings):
     WIKIPEDIA_USER_AGENT: str
     WIKIPEDIA_LANGUAGE: str
     USER_AGENT: str
+    WANDB_API_KEY: str
+    WANDB_PROJECT_NAME: str
 
     class Config:
         env_file = ".env"
