@@ -10,7 +10,7 @@ from .route_schemas import ProcessingConfig
 data_router = APIRouter(prefix="/data", tags=["data"])
 
 
-@data_router.post("/push")
+@data_router.post("/push/asset")
 async def push_asset_to_db(
     request: Request,
     asset: UploadFile,
@@ -52,7 +52,7 @@ async def push_asset_to_db(
     )
 
 
-@data_router.post("/process")
+@data_router.post("/process/asset")
 async def process_asset_text_into_chunks(
     request: Request, processing_config: ProcessingConfig
 ) -> JSONResponse:
