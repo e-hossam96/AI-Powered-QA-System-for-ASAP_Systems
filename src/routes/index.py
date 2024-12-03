@@ -90,7 +90,7 @@ async def search_vector_db(
         )
     results = [r.model_dump(exclude_none=True) for r in results]
     for r in results:
-        r["source_id"] = str(r["source_id"])
+        r["source_id"] = r["source_id"]
     return JSONResponse(
         content={
             "message": ResponseConfig.VECTORDB_SEARCH_SUCCEEDED.value,
