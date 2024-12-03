@@ -24,6 +24,7 @@ class Settings(BaseSettings):
     EMBEDDING_LLM_EMBEDDING_SIZE: int
     OPENAI_API_KEY: str
     WIKIPEDIA_USER_AGENT: str
+    WIKIPEDIA_LANGUAGE: str
 
     class Config:
         env_file = ".env"
