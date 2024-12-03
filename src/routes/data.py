@@ -78,7 +78,7 @@ async def process_asset_text_into_chunks(
             asset_content, processing_config.chunk_size, processing_config.overlap_size
         )
         asset_chunks = [
-            Chunk(text=c.page_content, source_name=asset.name, source_id=asset.id)
+            Chunk(text=c.page_content, source_name=asset.name, source_id=str(asset.id))
             for c in asset_chunks
         ]
         _ = await chunk_model.batch_push_chunks_to_db(asset_chunks)
