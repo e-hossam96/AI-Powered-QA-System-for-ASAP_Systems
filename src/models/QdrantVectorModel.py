@@ -92,6 +92,7 @@ class QdrantVectorModel(BaseModel):
                         score=record.score,
                     )
                     for record in result
+                    if record.score > 0.0
                 ]
             )
         return records
