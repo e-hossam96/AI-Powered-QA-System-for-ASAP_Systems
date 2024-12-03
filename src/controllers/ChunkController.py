@@ -67,15 +67,15 @@ class ChunkController(BaseController):
                 return text
             # add title if not main title
             if section.title != page.title:
-                text += f"{'\t' * level}{section.title}\n"
+                text += f"{' ' * 4 * level}{section.title}\n"
             # add section text
             if section.text:
-                text += f"{'\t' * level}{section.text}\n"
+                text += f"{' ' * 4 * level}{section.text}\n"
             # recursively format sub-sections
             for subsection in section.sections:
                 text += format_section(subsection, level + 1)
             return text
-        
+
         page_text = format_section(page)
         return page_text.strip()
 
