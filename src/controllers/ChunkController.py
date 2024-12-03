@@ -1,8 +1,6 @@
 import pathlib
 from .BaseController import BaseController
 from configs import AssetTypeConfig
-from models.data_schemas import Chunk
-from bson.objectid import ObjectId
 from langchain_core.documents.base import Document
 from langchain_community.document_loaders import TextLoader, PyMuPDFLoader
 from langchain_text_splitters import RecursiveCharacterTextSplitter
@@ -47,15 +45,3 @@ class ChunkController(BaseController):
         metadata = [doc.metadata for doc in asset_content]
         asset_chunks = text_splitter.create_documents(texts=texts, metadatas=metadata)
         return asset_chunks
-
-    # def convert_unstructured_asset_chunks_to_chunks(
-    #     self,
-    #     asset_chunks: list[Document],
-    #     source_name: str,
-    #     source_id: ObjectId,
-    # ) -> list[Chunk]:
-    #     chunks = [
-    #         Chunk(text=c.page_content, source_name=source_name, source_id=source_id)
-    #         for c in asset_chunks
-    #     ]
-    #     return chunks
