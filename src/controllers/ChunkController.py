@@ -78,3 +78,25 @@ class ChunkController(BaseController):
         
         page_text = format_section(page)
         return page_text.strip()
+
+    def get_webpage_content(self, url: str, **kwargs) -> list[Document] | None:
+        webpage_content = []
+        parsed_url = urlparse(url)
+        # go for wikipedia
+        if "wikipedia.org" in parsed_url.netloc:
+            page_title = unquote(parsed_url.path.split("/")[-1].replace("_", " "))
+            if page_title:
+                text = self.get_wikipedia_webpage_text(page_title, **kwargs)
+            if text is not None:
+                webpage_content.append(Document(page_content=text, source=url))
+        # other URLs
+        loader = WebBaseLoader(
+            web_paths=[url],
+            bs_kwargs={"parse_only": bs4.SoupStrainer("p")},
+            bs_get_text_kwargs={"separator": "\n", "strip": True},
+        )
+        for doc in loader.lazy_load():
+            webpage_content.append(doc)
+        if len(webpage_content) == 0:
+            return None
+        return webpage_content
