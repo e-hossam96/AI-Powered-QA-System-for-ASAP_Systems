@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     OPENAI_API_KEY: str
     WIKIPEDIA_USER_AGENT: str
     WIKIPEDIA_LANGUAGE: str
+    USER_AGENT: str
 
     class Config:
         env_file = ".env"
