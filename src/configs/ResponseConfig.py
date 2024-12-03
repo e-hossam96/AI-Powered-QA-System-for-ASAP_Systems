@@ -9,6 +9,8 @@ class ResponseConfig(Enum):
     DB_NO_ASSETS: str = "no assets found in database"
     DB_NO_CHUNKS: str = "no chunks found in database"
     DB_PROCESSED_ALL_ASSETS: str = "processed all assets into chunks"
+    URL_NO_CONTENT: str = "no content found in url"
+    URL_CONTENT_PROCESSING_SUCCEEDED: str = "processing url content succeeded"
     EMBEDDING_FAILED: str = "failed to generate embeddings"
     VECTORDB_INDEXING_SUCCEEDED: str = "indexing vector database succeeded"
     VECTORDB_SEARCH_SUCCEEDED: str = "searching vector database succeeded"

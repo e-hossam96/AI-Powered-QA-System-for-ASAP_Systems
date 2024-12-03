@@ -1,7 +1,6 @@
 from typing import Any
 from .BaseModel import BaseModel
 from .data_schemas import Vector
-from bson.objectid import ObjectId
 from configs import DatabaseConfig
 from qdrant_client import AsyncQdrantClient, models
 
@@ -57,8 +56,6 @@ class QdrantVectorModel(BaseModel):
         ):
             return False
         metadata = [v.model_dump(exclude_none=True) for v in vectors]
-        for m in metadata:
-            m["source_id"] = str(m["source_id"])
         vectors = [m.pop("vector") for m in metadata]
         self.vectordb_client.upload_collection(
             collection_name=collection_name,
@@ -91,7 +88,7 @@ class QdrantVectorModel(BaseModel):
                     Vector(
                         text=record.payload["text"],
                         source_name=record.payload["source_name"],
-                        source_id=ObjectId(record.payload["source_id"]),
+                        source_id=record.payload["source_id"],
                         score=record.score,
                     )
                     for record in result

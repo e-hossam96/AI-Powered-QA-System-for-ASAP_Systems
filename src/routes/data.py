@@ -5,12 +5,13 @@ from configs import ResponseConfig
 from fastapi.responses import JSONResponse
 from fastapi import APIRouter, Request, UploadFile, status
 from .route_schemas import ProcessingConfig
+from helpers import get_settings
 
 
 data_router = APIRouter(prefix="/data", tags=["data"])
 
 
-@data_router.post("/push")
+@data_router.post("/push/asset")
 async def push_asset_to_db(
     request: Request,
     asset: UploadFile,
@@ -52,7 +53,7 @@ async def push_asset_to_db(
     )
 
 
-@data_router.post("/process")
+@data_router.post("/process/asset")
 async def process_asset_text_into_chunks(
     request: Request, processing_config: ProcessingConfig
 ) -> JSONResponse:
@@ -83,6 +84,44 @@ async def process_asset_text_into_chunks(
         _ = await chunk_model.batch_push_chunks_to_db(asset_chunks)
     return JSONResponse(
         content={"message": ResponseConfig.DB_PROCESSED_ALL_ASSETS.value},
+        status_code=status.HTTP_200_OK,
+    )
+
+
+@data_router.post("/process/webpage")
+async def process_asset_text_into_chunks(
+    request: Request, processing_config: ProcessingConfig
+) -> JSONResponse:
+    app_settings = get_settings()
+    chunk_model = ChunkModel(request.app.db_client)
+    chunk_controller = ChunkController()
+    if processing_config.do_reset:
+        _ = await chunk_model.clear_all_chunks()
+    # getting webpage contents
+    webpage_content = chunk_controller.get_webpage_content(
+        processing_config.asset_name_or_url,
+        user_agent=app_settings.WIKIPEDIA_USER_AGENT,
+        language=app_settings.WIKIPEDIA_LANGUAGE,
+    )
+    if webpage_content is None:
+        return JSONResponse(
+            content={"message": ResponseConfig.URL_NO_CONTENT.value},
+            status_code=status.HTTP_400_BAD_REQUEST,
+        )
+    webpage_chunks = chunk_controller.process_unstructured_asset_content(
+        webpage_content, processing_config.chunk_size, processing_config.overlap_size
+    )
+    webpage_chunks = [
+        Chunk(
+            text=c.page_content,
+            source_name=processing_config.asset_name_or_url,
+            source_id=processing_config.asset_name_or_url,
+        )
+        for c in webpage_chunks
+    ]
+    _ = await chunk_model.batch_push_chunks_to_db(webpage_chunks)
+    return JSONResponse(
+        content={"message": ResponseConfig.URL_CONTENT_PROCESSING_SUCCEEDED.value},
         status_code=status.HTTP_200_OK,
     )
 

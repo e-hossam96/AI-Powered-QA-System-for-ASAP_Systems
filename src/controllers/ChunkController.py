@@ -1,10 +1,15 @@
+import bs4
 import pathlib
+import wikipediaapi
+from urllib.parse import urlparse, unquote
 from .BaseController import BaseController
 from configs import AssetTypeConfig
-from models.data_schemas import Chunk
-from bson.objectid import ObjectId
 from langchain_core.documents.base import Document
-from langchain_community.document_loaders import TextLoader, PyMuPDFLoader
+from langchain_community.document_loaders import (
+    TextLoader,
+    PyMuPDFLoader,
+    WebBaseLoader,
+)
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
@@ -48,14 +53,50 @@ class ChunkController(BaseController):
         asset_chunks = text_splitter.create_documents(texts=texts, metadatas=metadata)
         return asset_chunks
 
-    # def convert_unstructured_asset_chunks_to_chunks(
-    #     self,
-    #     asset_chunks: list[Document],
-    #     source_name: str,
-    #     source_id: ObjectId,
-    # ) -> list[Chunk]:
-    #     chunks = [
-    #         Chunk(text=c.page_content, source_name=source_name, source_id=source_id)
-    #         for c in asset_chunks
-    #     ]
-    #     return chunks
+    def get_wikipedia_webpage_text(self, title: str, **kwargs) -> str | None:
+        wiki_api = wikipediaapi.Wikipedia(**kwargs)
+        page = wiki_api.page(title)
+        if not page.exists():
+            return None
+
+        def format_section(section, level=0):
+            excluded_sections = ["See also", "References", "External links"]
+            text = ""
+            # skip unwanted sections
+            if section.title in excluded_sections:
+                return text
+            # add title if not main title
+            if section.title != page.title:
+                text += f"{' ' * 4 * level}{section.title}\n"
+            # add section text
+            if section.text:
+                text += f"{' ' * 4 * level}{section.text}\n"
+            # recursively format sub-sections
+            for subsection in section.sections:
+                text += format_section(subsection, level + 1)
+            return text
+
+        page_text = format_section(page)
+        return page_text.strip()
+
+    def get_webpage_content(self, url: str, **kwargs) -> list[Document] | None:
+        webpage_content = []
+        parsed_url = urlparse(url)
+        # go for wikipedia
+        if "wikipedia.org" in parsed_url.netloc:
+            page_title = unquote(parsed_url.path.split("/")[-1].replace("_", " "))
+            if page_title:
+                text = self.get_wikipedia_webpage_text(page_title, **kwargs)
+            if text is not None:
+                webpage_content.append(Document(page_content=text, source=url))
+        # other URLs
+        loader = WebBaseLoader(
+            web_paths=[url],
+            bs_kwargs={"parse_only": bs4.SoupStrainer("p")},
+            bs_get_text_kwargs={"separator": "\n", "strip": True},
+        )
+        for doc in loader.lazy_load():
+            webpage_content.append(doc)
+        if len(webpage_content) == 0:
+            return None
+        return webpage_content
