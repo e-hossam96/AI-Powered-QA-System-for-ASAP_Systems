@@ -1,3 +1,4 @@
+import re
 import bs4
 import pathlib
 import wikipediaapi
@@ -48,7 +49,7 @@ class ChunkController(BaseController):
             chunk_size=chunk_size,
             chunk_overlap=overlap_size,
         )
-        texts = [doc.page_content for doc in asset_content]
+        texts = [re.sub(r"\s+", r" ", doc.page_content) for doc in asset_content]
         metadata = [doc.metadata for doc in asset_content]
         asset_chunks = text_splitter.create_documents(texts=texts, metadatas=metadata)
         return asset_chunks
