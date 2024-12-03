@@ -1,8 +1,15 @@
+import bs4
 import pathlib
+import wikipediaapi
+from urllib.parse import urlparse, unquote
 from .BaseController import BaseController
 from configs import AssetTypeConfig
 from langchain_core.documents.base import Document
-from langchain_community.document_loaders import TextLoader, PyMuPDFLoader
+from langchain_community.document_loaders import (
+    TextLoader,
+    PyMuPDFLoader,
+    WebBaseLoader,
+)
 from langchain_text_splitters import RecursiveCharacterTextSplitter
 
 
@@ -45,3 +52,29 @@ class ChunkController(BaseController):
         metadata = [doc.metadata for doc in asset_content]
         asset_chunks = text_splitter.create_documents(texts=texts, metadatas=metadata)
         return asset_chunks
+
+    def get_wikipedia_webpage_text(self, title: str, **kwargs) -> str | None:
+        wiki_api = wikipediaapi.Wikipedia(**kwargs)
+        page = wiki_api.page(title)
+        if not page.exists():
+            return None
+
+        def format_section(section, level=0):
+            excluded_sections = ["See also", "References", "External links"]
+            text = ""
+            # skip unwanted sections
+            if section.title in excluded_sections:
+                return text
+            # add title if not main title
+            if section.title != page.title:
+                text += f"{'\t' * level}{section.title}\n"
+            # add section text
+            if section.text:
+                text += f"{'\t' * level}{section.text}\n"
+            # recursively format sub-sections
+            for subsection in section.sections:
+                text += format_section(subsection, level + 1)
+            return text
+        
+        page_text = format_section(page)
+        return page_text.strip()
