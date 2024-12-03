@@ -1,3 +1,4 @@
+import weave
 from typing import Any
 from openai import AsyncOpenAI
 from .BaseModel import BaseModel
@@ -15,6 +16,7 @@ class OpenAILLMModel(BaseModel):
             db_client, vectordb_client, embedding_client, generation_client
         )
 
+    @weave.op()
     async def generate_text(
         self,
         model_name: str,
@@ -45,6 +47,7 @@ class OpenAILLMModel(BaseModel):
             return None
         return resp.choices[0].message.content
 
+    @weave.op()
     async def embed_text(self, text: str, model_name: str) -> list[float] | None:
         # ensure client is set
         if self.embedding_client is None:

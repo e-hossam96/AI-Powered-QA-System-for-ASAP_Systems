@@ -4,6 +4,8 @@ In this file we will define the main fastapi app and connect it \
 with the different routes of the system.
 """
 
+import wandb
+import weave
 from fastapi import FastAPI
 from routes.base import base_router
 from routes.data import data_router
@@ -63,6 +65,15 @@ def connect_embedding_client(
     return app
 
 
+def connect_tracer_client(
+    app: FastAPI,
+    app_settinigs: Settings,
+) -> FastAPI:
+    _ = wandb.login(key=app_settinigs.WANDB_API_KEY)
+    app.tracer_client = weave.init(project_name=app_settinigs.WANDB_PROJECT_NAME)
+    return app
+
+
 @asynccontextmanager
 async def connect_lifespan_clients(app: FastAPI):
     settings = get_settings()
@@ -70,9 +81,14 @@ async def connect_lifespan_clients(app: FastAPI):
     app = connect_vectordb_client(app, settings)
     app = connect_generation_client(app, settings)
     app = connect_embedding_client(app, settings)
+    app = connect_tracer_client(app, settings)
     yield
     app.db_connection.close()
+    app.db_client = None
     app.vectordb_client = None
+    app.generation_client = None
+    app.embedding_client = None
+    app.tracer_client = None
 
 
 app = FastAPI(lifespan=connect_lifespan_clients)
