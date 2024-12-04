@@ -59,6 +59,12 @@ To start working, implement the following steps sequentially.
   cd application
   ```
 
+- Fill the `.env.example` fill and save it into `.env` in the same directory. This wil hold the setups and secret keys to run the application.
+
+  ```bash
+  cp .env.example .env
+  ```
+
 - Start the servies in the `docker-compose.yml` file.
 
   ```bash
@@ -105,7 +111,7 @@ At any point if you would like to update the codes and test them, you can create
   python -m pip install -r requirements.txt
   ```
 
-And now you can start developing the codes. Notice, that the `docker` services are still needed for development (except the backend image).
+And now you can start developing the codes. Notice, that the `docker` services (except the backend image) and the `.env` file are still needed for development .
 
 ## API Endpoints
 
