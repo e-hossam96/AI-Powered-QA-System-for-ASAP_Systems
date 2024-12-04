@@ -206,3 +206,21 @@ We have implemented 7 `endpoints` that you can use. Only one of them, the `rag-q
   ```
 
 Feel free to used the _lastest_ postman collection provided here, [postman-collection](./src/assets/asap.postman_collection.json), to quickly set the calls up.
+
+## LLMops
+
+We have used **Weights & Biases**' `weave` to monitor the interactions with the backend LLMs (embedding and chat). Using `weave`, we can directly add feedbacks to the LLMs calls using _thumbs-up_ 👍 and _thumbs-down_ 👎 emojis and notes. This helpful in case we needed to collect fine-tuning data to further inhance our application. User feedbacks can also be integrated using the same options with just slight modification to the frontend code and a dedicated endpoint to collect the feedbacks. We believe this can be easily added later.
+
+The followings are screenshots of the dashboard of the application's project on **Weights & Biases**. It is also public here: [asap-qa-i](https://wandb.ai/e_hossam96/asap-ai-qa/weave).
+
+![Ops](./weave-ops.png)
+
+![Ops with Latency](./weave-ops-with-latency.png)
+
+![Sample Op](./weave-sample-op.png)
+
+![Sample Op Response](./weave-sample-op-response.png)
+
+## License
+
+MIT
