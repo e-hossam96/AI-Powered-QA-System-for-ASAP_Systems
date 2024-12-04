@@ -1,16 +1,24 @@
 services:
   mongodb:
-    image: mongo
+    image: mongo:8.0.3
     ports:
       - 27017:27017
     environment:
       - MONGO_INITDB_ROOT_USERNAME=${MONGO_ADMIN_USER}
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ADMIN_PASS}
+    volumes:
+      - mongodb-data:/data/db
+      - mongo-init:/docker-entrypoint-initdb.d
     networks:
-      - local_dev
+      - rag_app
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.runCommand('ping').ok"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
 
   mongo-express:
-    image: mongo-express
+    image: mongo-express:1.0.2
     restart: always
     ports:
       - 8081:8081
@@ -19,18 +27,23 @@ services:
       - ME_CONFIG_MONGODB_ADMINPASSWORD=${MONGO_ADMIN_PASS}
       - ME_CONFIG_MONGODB_SERVER=mongodb
     depends_on:
-      - mongodb
+      mongodb:
+        condition: service_healthy
     networks:
-      - local_dev
+      - rag_app
+    volumes:
+      - mongo-express-logs:/var/log/mongo-express
 
   qdrant:
-    image: qdrant/qdrant
+    image: qdrant/qdrant:v1.12.4
     ports:
       - 6333:6333
     depends_on:
       - mongodb
     networks:
-      - local_dev
+      - rag_app
+    volumes:
+      - qdrant-data:/qdrant/storage
 
   backend:
     build:
@@ -40,8 +53,27 @@ services:
       - 8000:8000
     env_file:
       - .env
+    volumes:
+      - app:/app
+      - backend-logs:/app/logs
     networks:
-      - local_dev
+      - rag_app
+    develop:
+      watch:
+        - action: sync
+          path: ./src
+          target: /app
+        - action: rebuild
+          path: ./src/Dockerfile
 
 networks:
-  local_dev:
+  rag_app:
+    driver: bridge
+
+volumes:
+  mongodb-data:
+  mongo-init:
+  mongo-express-logs:
+  qdrant-data:
+  app:
+  backend-logs:
