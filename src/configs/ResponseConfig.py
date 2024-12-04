@@ -2,6 +2,7 @@ from enum import Enum
 
 
 class ResponseConfig(Enum):
+    BASE: str = "nice to meet you!"
     ASSET_UNSUPPORTED_TYPE: str = "asset type is not supported"
     ASSET_EXCEEDED_MAX_SIZE: str = "asset exceeded maximum allowed size"
     ASSET_UPLOAD_FAILED: str = "asset upload failed"
