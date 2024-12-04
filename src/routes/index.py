@@ -49,7 +49,7 @@ async def push_chunks_into_vector_db(
         num_db_vectors += len(vectors)
         # vectorize the texts
         for v in vectors:
-            v.vector = await embedding_model.embed_text(
+            v.vector, _ = await embedding_model.embed_text(
                 text=v.text, model_name=app_settings.EMBEDDING_LLM_MODEL_NAME
             )
         # remove all vectors with no embeddings
@@ -76,7 +76,7 @@ async def search_vector_db(
     vectordb_model = QdrantVectorModel(request.app.vectordb_client)
     embedding_model = OpenAILLMModel(embedding_client=request.app.embedding_client)
     vector = Vector(text=search_config.text)
-    vector.vector = await embedding_model.embed_text(
+    vector.vector, _ = await embedding_model.embed_text(
         vector.text, app_settings.EMBEDDING_LLM_MODEL_NAME
     )
     if vector.vector is None:
