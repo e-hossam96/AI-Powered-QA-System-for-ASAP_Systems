@@ -1,3 +1,4 @@
+import os
 from typing import Any
 from .BaseModel import BaseModel
 from .data_schemas import Vector
@@ -58,6 +59,7 @@ class QdrantVectorModel(BaseModel):
         metadata = [v.model_dump(exclude_none=True) for v in vectors]
         vectors = [m.pop("vector") for m in metadata]
         self.vectordb_client.upload_collection(
+            parallel=os.cpu_count(),  # full cpu power
             collection_name=collection_name,
             vectors=vectors,
             payload=metadata,
