@@ -21,7 +21,7 @@
 			"response": []
 		},
 		{
-			"name": "data-push",
+			"name": "data-push-asset",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -36,20 +36,21 @@
 					]
 				},
 				"url": {
-					"raw": "{{base_url}}/data/push",
+					"raw": "{{base_url}}/data/push/asset",
 					"host": [
 						"{{base_url}}"
 					],
 					"path": [
 						"data",
-						"push"
+						"push",
+						"asset"
 					]
 				}
 			},
 			"response": []
 		},
 		{
-			"name": "data-process",
+			"name": "data-process-asset",
 			"request": {
 				"method": "POST",
 				"header": [],
@@ -63,13 +64,14 @@
 					}
 				},
 				"url": {
-					"raw": "{{base_url}}/data/process",
+					"raw": "{{base_url}}/data/process/asset",
 					"host": [
 						"{{base_url}}"
 					],
 					"path": [
 						"data",
-						"process"
+						"process",
+						"asset"
 					]
 				}
 			},
@@ -109,7 +111,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"text\": \"What are the different model sizes of the GPT2 model family?\",\r\n    \"limit\": 2\r\n}",
+					"raw": "{\r\n    \"text\": \"How long did the roman empire rule?\",\r\n    \"limit\": 4\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -136,7 +138,7 @@
 				"header": [],
 				"body": {
 					"mode": "raw",
-					"raw": "{\r\n    \"text\": \"What are the different model sizes of the GPT2 model family?\",\r\n    \"limit\": 2\r\n}",
+					"raw": "{\r\n    \"text\": \"How long did the roman empire rule?\",\r\n    \"limit\": 4\r\n}",
 					"options": {
 						"raw": {
 							"language": "json"
@@ -151,6 +153,34 @@
 					"path": [
 						"rag",
 						"query"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "data-process-webpage",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\r\n    \"asset_name_or_url\": \"https://en.wikipedia.org/wiki/World_War_II\",\r\n    // \"asset_name_or_url\": \"https://en.wikipedia.org/wiki/History_of_artificial_intelligence\",\r\n    // \"asset_name_or_url\": \"https://en.wikipedia.org/wiki/Ancient_Egypt\",\r\n    // \"asset_name_or_url\": \"https://en.wikipedia.org/wiki/Roman_Empire\",\r\n    \"chunk_size\": 2000,\r\n    \"overlap_size\": 100,\r\n    \"do_reset\": false\r\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "{{base_url}}/data/process/webpage",
+					"host": [
+						"{{base_url}}"
+					],
+					"path": [
+						"data",
+						"process",
+						"webpage"
 					]
 				}
 			},
