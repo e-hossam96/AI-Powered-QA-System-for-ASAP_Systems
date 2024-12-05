@@ -8,6 +8,40 @@ class OpenAILLMController(BaseController):
     def __init__(self) -> None:
         super().__init__()
 
+        self.tools = [  # one tool to search the vector db
+            {
+                "type": "function",
+                "function": {
+                    "name": "search_knowledge_base",
+                    "description": "search the knowledge base for texts similar to the input.",
+                    "parameters": {
+                        "type": "object",
+                        "properties": {
+                            "text": {
+                                "type": "string",
+                                "description": "the text used to search knowledge base",
+                            },
+                        },
+                        "required": ["text"],
+                        "additionalProperties": False,
+                    },
+                },
+            }
+        ]
+
+    def get_tools(self) -> list[dict]:
+        return self.tools
+
+    def get_tools_aspects(self) -> list[str]:
+        # return name and param names of tools
+        tools_aspects = []
+        for tool in self.tools:
+            tool_aspects = {}
+            tools_aspects["name"] = tool["function"]["name"]
+            tool_aspects["param_names"] = tool["function"]["parameters"].keys()
+            tools_aspects.append(tool_aspects)
+        return tools_aspects
+
     def process_prompt_text(
         self,
         prompt_text: str,
