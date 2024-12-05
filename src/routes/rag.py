@@ -10,6 +10,27 @@ from helpers import get_settings
 
 rag_router = APIRouter(prefix="/rag", tags=["rag"])
 
+# one tool to search the vector db
+tools = [
+    {
+        "type": "function",
+        "function": {
+            "name": "search_knowledge_base",
+            "parameters": {
+                "type": "object",
+                "properties": {
+                    "text": {
+                        "type": "string",
+                        "description": "the text used to search knowledge base",
+                    },
+                },
+                "required": ["text"],
+                "additionalProperties": False,
+            },
+        },
+    }
+]
+
 
 @rag_router.post("/query")
 async def chat(request: Request, rag_config: RagQueryConfig) -> JSONResponse:
