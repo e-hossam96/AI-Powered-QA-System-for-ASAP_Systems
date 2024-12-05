@@ -24,7 +24,7 @@ class OpenAILLMController(BaseController):
     def construct_rag_messages(
         self,
         prompt: str,
-        augmentations: list[str] | None,
+        augmentations: list[str] | None = None,
         chat_history: list[dict] | None = None,
     ) -> list[dict]:
         if chat_history is None:
