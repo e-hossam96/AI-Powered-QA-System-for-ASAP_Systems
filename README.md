@@ -10,7 +10,6 @@ What you should see in the `src` directory should reflect these concepts as foll
 
 ```terminal
 src
-├── Dockerfile
 ├── assets
 ├── configs
 ├── controllers
@@ -37,13 +36,15 @@ src
 
 ```terminal
 .
+├── Dockerfile
 ├── LICENSE
 ├── README.md
-├── app
-│   └── Dockerfile
 ├── docker-compose.yml
-└── src
-    ├── Dockerfile
+├── src
+├── weave-ops-with-latency.png
+├── weave-ops.png
+├── weave-sample-op-response.png
+└── weave-sample-op.png
 ```
 
 The code is relatively straight forward to start with. You only need `docker` engine and `git` installed to start working.
@@ -194,7 +195,7 @@ We have implemented 7 `endpoints` that you can use. Only one of them, the `rag-q
 
 - RAG Query (_main endpoint_)
 
-  To be used to send queries to the backend LLM and get a response back. Notice that this endpoint also accepts a `chat_history` parameter to continue the converation along with the _user query_. Currently, the endpoint takes only the _raw_ user query and use it to seach the vector database. The chat history is added for the LLM's reference for now. Later on, the LLM can be provided with the _index search_ tool that it can call using the _adapted_ user query (adapted based on the chat history). `I might add this functionality today!`
+  To be used to send queries to the backend LLM and get a response back. Notice that this endpoint also accepts a `chat_history` parameter to continue the converation along with the _user query_. Currently, the endpoint takes only the _raw_ user query and use it to seach the vector database. The chat history is added for the LLM's reference for now. Later on, the LLM can be provided with the _index search_ tool that it can call using the _adapted_ user query (adapted based on the chat history). ~`I might add this functionality today!`~ **`Added`**
 
   ```bash
   curl -X POST http://localhost:8000/rag/query \
@@ -218,6 +219,8 @@ The followings are screenshots of the dashboard of the application's project on 
 ![Ops with Latency](./weave-ops-with-latency.png)
 
 ![Sample Op](./weave-sample-op.png)
+
+![Sample Op Tool Call](./weave-sample-op-tool-call.png)
 
 ![Sample Op Response](./weave-sample-op-response.png)
 
