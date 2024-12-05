@@ -25,7 +25,8 @@ class OpenAILLMModel(BaseModel):
         messages: list[dict],
         max_output_tokens: int = 512,
         temperature: float = 0.01,
-    ) -> tuple[str, ChatCompletion] | None:
+        tools: list[dict] | None = None,
+    ) -> ChatCompletion | None:
         # ensure client is set
         if self.generation_client is None:
             return None
@@ -38,6 +39,7 @@ class OpenAILLMModel(BaseModel):
             messages=messages,
             max_completion_tokens=max_output_tokens,
             temperature=temperature,
+            tools=tools,
         )
         # validate response
         if (
@@ -47,12 +49,12 @@ class OpenAILLMModel(BaseModel):
             or resp.choices[0].message is None
         ):
             return None
-        return resp.choices[0].message.content, resp
+        return resp
 
     @weave.op()
     async def embed_text(
         self, text: str, model_name: str
-    ) -> tuple[list[float], CreateEmbeddingResponse] | None:
+    ) -> CreateEmbeddingResponse | None:
         # ensure client is set
         if self.embedding_client is None:
             return None
@@ -67,4 +69,4 @@ class OpenAILLMModel(BaseModel):
             or resp.data[0].embedding is None
         ):
             return None
-        return resp.data[0].embedding, resp
+        return resp
