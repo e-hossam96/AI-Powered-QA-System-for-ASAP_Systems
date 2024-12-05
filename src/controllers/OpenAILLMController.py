@@ -24,7 +24,7 @@ class OpenAILLMController(BaseController):
     def construct_rag_messages(
         self,
         prompt: str,
-        augmentations: list[str],
+        augmentations: list[str] | None,
         chat_history: list[dict] | None = None,
     ) -> list[dict]:
         if chat_history is None:
@@ -32,18 +32,26 @@ class OpenAILLMController(BaseController):
             chat_history = [
                 {"role": OpenAIRoleConfig.SYSTEM.value, "content": system_msg}
             ]
-        augmentations = [
-            rag_templates.document_prompt.substitute(
-                {"doc_num": i + 1, "chunk_text": aug}
+        if augmentations is None:
+            chat_history.append(
+                {
+                    "role": OpenAIRoleConfig.USER.value,
+                    "content": f"{prompt}",
+                }
             )
-            for i, aug in enumerate(augmentations)
-        ]
-        augmentations = "\n".join(augmentations)
-        prompt = rag_templates.footer_prompt.substitute({"user_query": prompt})
-        chat_history.append(
-            {
-                "role": OpenAIRoleConfig.USER.value,
-                "content": f"{augmentations}\n\n{prompt}",
-            }
-        )
+        else:
+            augmentations = [
+                rag_templates.document_prompt.substitute(
+                    {"doc_num": i + 1, "chunk_text": aug}
+                )
+                for i, aug in enumerate(augmentations)
+            ]
+            augmentations = "\n".join(augmentations)
+            prompt = rag_templates.footer_prompt.substitute({"user_query": prompt})
+            chat_history.append(
+                {
+                    "role": OpenAIRoleConfig.USER.value,
+                    "content": f"{augmentations}\n\n{prompt}",
+                }
+            )
         return chat_history
