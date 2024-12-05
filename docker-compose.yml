@@ -54,7 +54,6 @@ services:
     env_file:
       - .env
     volumes:
-      - app:/app
       - backend-logs:/app/logs
     networks:
       - rag_app
@@ -75,5 +74,4 @@ volumes:
   mongo-init:
   mongo-express-logs:
   qdrant-data:
-  app:
   backend-logs:
