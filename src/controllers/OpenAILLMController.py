@@ -90,3 +90,16 @@ class OpenAILLMController(BaseController):
         ]
         augmentations = "\n".join(augmentations)
         return augmentations
+
+    def finalize_messages(self, messages: list[dict]) -> list[dict]:
+        for message in messages:
+            if "tool_calls" in message:
+                message.pop("content", None)
+                message.pop("refusal", None)
+                for tool in message["tool_calls"]:
+                    tool["function"]["arguments"] = json.loads(
+                        tool["function"]["arguments"]
+                    )
+            elif message["role"] == "tool":
+                message["content"] = json.loads(message["content"])
+        return messages

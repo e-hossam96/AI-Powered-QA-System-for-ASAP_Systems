@@ -11,28 +11,6 @@ import logging
 
 rag_router = APIRouter(prefix="/rag", tags=["rag"])
 
-# one tool to search the vector db
-tools = [
-    {
-        "type": "function",
-        "function": {
-            "name": "search_knowledge_base",
-            "description": "search the knowledge base for texts similar to the input.",
-            "parameters": {
-                "type": "object",
-                "properties": {
-                    "text": {
-                        "type": "string",
-                        "description": "the text used to search knowledge base",
-                    },
-                },
-                "required": ["text"],
-                "additionalProperties": False,
-            },
-        },
-    }
-]
-
 
 @rag_router.post("/query")
 async def chat(request: Request, rag_config: RagQueryConfig) -> JSONResponse:
@@ -48,7 +26,7 @@ async def chat(request: Request, rag_config: RagQueryConfig) -> JSONResponse:
         app_settings.GENERATION_LLM_MAX_PROMPT_TOKENS,
         app_settings.GENERATION_LLM_SPECIAL_TOKENS,
     )
-    messages = generation_controller.construct_rag_messages(
+    messages = generation_controller.construct_user_query(
         prompt=prompt, chat_history=rag_config.chat_history
     )
     ans = await generation_model.generate_text(
@@ -56,7 +34,7 @@ async def chat(request: Request, rag_config: RagQueryConfig) -> JSONResponse:
         messages=messages,
         max_output_tokens=app_settings.GENERATION_LLM_MAX_OUTPUT_TOKENS,
         temperature=app_settings.GENERATION_LLM_TEMPERATURE,
-        tools=tools,
+        tools=generation_controller.get_tools(),
     )
 
     if ans is None:
@@ -103,7 +81,7 @@ async def chat(request: Request, rag_config: RagQueryConfig) -> JSONResponse:
         augmenttions = generation_controller.process_augmentations(augmenttions)
 
         tool_call_result_message = {
-            "role": "tool",
+            "role": OpenAIRoleConfig.TOOL.value,
             "content": json.dumps(
                 {
                     "text": vector.text,
@@ -119,7 +97,7 @@ async def chat(request: Request, rag_config: RagQueryConfig) -> JSONResponse:
             messages=messages,
             max_output_tokens=app_settings.GENERATION_LLM_MAX_OUTPUT_TOKENS,
             temperature=app_settings.GENERATION_LLM_TEMPERATURE,
-            tools=tools,
+            tools=generation_controller.get_tools(),
         )
 
     # finialize chat history and return
@@ -129,16 +107,7 @@ async def chat(request: Request, rag_config: RagQueryConfig) -> JSONResponse:
             "content": ans.choices[0].message.content,
         }
     )
-    for message in messages:
-        if "tool_calls" in message:
-            message.pop("content", None)
-            message.pop("refusal", None)
-            for tool in message["tool_calls"]:
-                tool["function"]["arguments"] = json.loads(
-                    tool["function"]["arguments"]
-                )
-        elif message["role"] == "tool":
-            message["content"] = json.loads(message["content"])
+    messages = generation_controller.finalize_messages(messages)
     return JSONResponse(
         content={
             "message": ResponseConfig.RAG_ANS_GENERATION_SUCCEEDED.value,
