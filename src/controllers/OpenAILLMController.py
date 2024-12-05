@@ -55,3 +55,13 @@ class OpenAILLMController(BaseController):
                 }
             )
         return chat_history
+
+    def process_augmentations(self, augmentations: list[str]) -> str:
+        augmentations = [
+            rag_templates.document_prompt.substitute(
+                {"doc_num": i + 1, "chunk_text": aug}
+            )
+            for i, aug in enumerate(augmentations)
+        ]
+        augmentations = "\n".join(augmentations)
+        return augmentations
