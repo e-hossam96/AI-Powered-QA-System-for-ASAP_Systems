@@ -67,12 +67,16 @@ class OpenAILLMController(BaseController):
             chat_history = [
                 {"role": OpenAIRoleConfig.SYSTEM.value, "content": system_msg}
             ]
-        # ensure all contents are json objects or strings
+        # ensure all contents are json strings or strings
+        # also, ensure function args for tool calls are json strings
         for m in chat_history:
-            try:
-                m["content"] = json.loads(m["content"])
-            except json.decoder.JSONDecodeError as e:
-                continue
+            if "content" in m and isinstance(m["content"], dict):
+                m["content"] = json.dumps(m["content"])
+            elif "content" not in m:
+                for tool in m["tool_calls"]:
+                    tool["function"]["arguments"] = json.dumps(
+                        tool["function"]["arguments"]
+                    )
         chat_history.append(
             {
                 "role": OpenAIRoleConfig.USER.value,
