@@ -102,7 +102,7 @@ At any point if you would like to update the codes and test them, you can create
 - Create the **asap** environment.
 
   ```bash
-  conda create -n asap python=3.9.11
+  conda create -n asap python=3.11.9
   ```
 
 - Intall the `pip` dependencies.
