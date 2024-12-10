@@ -8,7 +8,8 @@ services:
       - MONGO_INITDB_ROOT_PASSWORD=${MONGO_ADMIN_PASS}
     volumes:
       - mongodb-data:/data/db
-      - mongo-init:/docker-entrypoint-initdb.d
+      - mongodb-data-config:/data/configdb
+      - mongodb-init:/docker-entrypoint-initdb.d
     networks:
       - rag_app
     healthcheck:
@@ -71,7 +72,8 @@ networks:
 
 volumes:
   mongodb-data:
-  mongo-init:
+  mongodb-data-config:
+  mongodb-init:
   mongo-express-logs:
   qdrant-data:
   backend-logs:
