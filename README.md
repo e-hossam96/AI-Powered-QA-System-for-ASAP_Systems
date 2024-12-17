@@ -1,6 +1,6 @@
 # AI-Powered-QA-System-for-ASAP_Systems
 
-AI Powered Question Answering System using LLMs. This is a take home task implementation for **ASAP Systems Barcloud** that features simple RAG to answer user queries about specific topics. The system is a straight forward _converation-memory-conservative_ application.
+AI Powered Question Answering System using LLMs. This is a take home task implementation for **ASAP Systems** that features simple RAG to answer user queries about specific topics. The system is a straight forward _conversation-memory-conservative_ application. `Hired`.
 
 ## Design Description
 
