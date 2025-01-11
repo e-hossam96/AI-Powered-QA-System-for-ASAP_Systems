@@ -31,6 +31,7 @@ class Settings(BaseSettings):
     USER_AGENT: str
     WANDB_API_KEY: str
     WANDB_PROJECT_NAME: str
+    WEAVE_PROJECT_NAME: str
 
     class Config:
         env_file = ".env"
