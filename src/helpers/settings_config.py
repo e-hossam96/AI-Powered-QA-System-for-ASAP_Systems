@@ -32,6 +32,13 @@ class Settings(BaseSettings):
     WANDB_API_KEY: str
     WANDB_PROJECT_NAME: str
     WEAVE_PROJECT_NAME: str
+    # GENERATION LLM FOR EVALUATION
+    EVAL_LLM_BASE_URL: str
+    EVAL_LLM_MODEL_NAME: str
+    EVAL_LLM_SPECIAL_TOKENS: list[str]
+    EVAL_LLM_MAX_PROMPT_TOKENS: int
+    EVAL_LLM_MAX_OUTPUT_TOKENS: int
+    EVAL_LLM_TEMPERATURE: float
 
     class Config:
         env_file = ".env"
