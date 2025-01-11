@@ -112,6 +112,12 @@ At any point if you would like to update the codes and test them, you can create
   python -m pip install -r requirements.txt
   ```
 
+- `OR` you can directly create the environment and install the dependencies using the conda `environment.yml` file.
+
+  ```bash
+  conda env create
+  ```
+
 And now you can start developing the codes. Notice, that the `docker` services (except the backend image) and the `.env` file are still needed for development .
 
 ## API Endpoints
