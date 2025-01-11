@@ -70,7 +70,7 @@ def connect_tracer_client(
     app_settinigs: Settings,
 ) -> FastAPI:
     _ = wandb.login(key=app_settinigs.WANDB_API_KEY)
-    app.tracer_client = weave.init(project_name=app_settinigs.WANDB_PROJECT_NAME)
+    app.tracer_client = weave.init(project_name=app_settinigs.WEAVE_PROJECT_NAME)
     return app
 
 
