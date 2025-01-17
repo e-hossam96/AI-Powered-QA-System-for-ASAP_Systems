@@ -7,4 +7,4 @@ def read_eval_data(path: Path) -> list[str] | None:
         data = data.split("\n")
     if not data:
         data = None
-    return data
+    return [{"query": q} for q in data]
