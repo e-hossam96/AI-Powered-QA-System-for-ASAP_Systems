@@ -39,6 +39,8 @@ class Settings(BaseSettings):
     EVAL_LLM_MAX_PROMPT_TOKENS: int
     EVAL_LLM_MAX_OUTPUT_TOKENS: int
     EVAL_LLM_TEMPERATURE: float
+    EVAL_DATA_NAME: str
+    EVAL_DATA_PATH: str
 
     class Config:
         env_file = ".env"
