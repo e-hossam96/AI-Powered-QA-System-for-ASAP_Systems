@@ -97,3 +97,24 @@ class ToolCallRAGPipeline(weave.Model):
         )
         messages = self.generation_controller.finalize_messages(messages)
         return messages[-1]["content"]
+
+
+class RetrieverPipeline(weave.Model):
+    vectordb_model: QdrantVectorModel
+    embedding_model: OpenAILLMModel
+    app_settings: Settings
+
+    @weave.op()
+    async def predict(self, query: str, limit: int | None = 4) -> list[str] | None:
+        vector = Vector(text=query)
+        resp = await self.embedding_model.embed_text(
+            vector.text, self.app_settings.EMBEDDING_LLM_MODEL_NAME
+        )
+        vector.vector = resp.data[0].embedding if resp is not None else resp
+        if vector.vector is None:
+            return None
+        results = await self.vectordb_model.search_by_vector(vector, limit)
+        if len(results) == 0:
+            return None
+        results[:] = [r.model_dump(exclude_none=True)["text"] for r in results]
+        return results
