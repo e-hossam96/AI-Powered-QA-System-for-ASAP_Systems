@@ -17,7 +17,7 @@ class ToolCallRAGPipeline(weave.Model):
     @weave.op()
     async def predict(
         self, query: str, chat_history: list[dict] | None = None, limit: int | None = 4
-    ) -> str | None:
+    ) -> dict | None:
         prompt = self.generation_controller.process_prompt_text(
             query,
             self.app_settings.GENERATION_LLM_MAX_PROMPT_TOKENS,
@@ -105,7 +105,7 @@ class RetrieverPipeline(weave.Model):
     app_settings: Settings
 
     @weave.op()
-    async def predict(self, query: str, limit: int | None = 4) -> list[str] | None:
+    async def predict(self, query: str, limit: int | None = 4) -> dict | None:
         vector = Vector(text=query)
         resp = await self.embedding_model.embed_text(
             vector.text, self.app_settings.EMBEDDING_LLM_MODEL_NAME
