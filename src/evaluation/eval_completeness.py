@@ -26,6 +26,9 @@ async def score_completeness(
         **kwargs,
     )
     if ans is None:
-        return None
-    score = json.loads(ans.choices[0].message.content)
+        return {"reason": None, "score": None}
+    try:
+        score = json.loads(ans.choices[0].message.content)
+    except Exception as e:
+        score = {"reason": None, "score": None}
     return score
