@@ -11,6 +11,7 @@ from routes.base import base_router
 from routes.data import data_router
 from routes.index import index_router
 from routes.rag import rag_router
+from routes.eval import eval_router
 from configs import VectorDBProviderConfig
 from contextlib import asynccontextmanager
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -54,6 +55,17 @@ def connect_generation_client(
     return app
 
 
+def connect_evaluation_client(
+    app: FastAPI,
+    app_settinigs: Settings,
+) -> FastAPI:
+    app.evaluation_client = AsyncOpenAI(
+        api_key=app_settinigs.OPENAI_API_KEY,
+        base_url=app_settinigs.EVAL_LLM_BASE_URL,
+    )
+    return app
+
+
 def connect_embedding_client(
     app: FastAPI,
     app_settinigs: Settings,
@@ -70,7 +82,7 @@ def connect_tracer_client(
     app_settinigs: Settings,
 ) -> FastAPI:
     _ = wandb.login(key=app_settinigs.WANDB_API_KEY)
-    app.tracer_client = weave.init(project_name=app_settinigs.WANDB_PROJECT_NAME)
+    app.tracer_client = weave.init(project_name=app_settinigs.WEAVE_PROJECT_NAME)
     return app
 
 
@@ -82,11 +94,13 @@ async def connect_lifespan_clients(app: FastAPI):
     app = connect_generation_client(app, settings)
     app = connect_embedding_client(app, settings)
     app = connect_tracer_client(app, settings)
+    app = connect_evaluation_client(app, settings)
     yield
     app.db_connection.close()
     app.db_client = None
     app.vectordb_client = None
     app.generation_client = None
+    app.evaluation_client = None
     app.embedding_client = None
     app.tracer_client = None
 
@@ -96,3 +110,4 @@ app.include_router(base_router)
 app.include_router(data_router)
 app.include_router(index_router)
 app.include_router(rag_router)
+app.include_router(eval_router)
