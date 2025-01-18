@@ -96,7 +96,7 @@ class ToolCallRAGPipeline(weave.Model):
             }
         )
         messages = self.generation_controller.finalize_messages(messages)
-        return {"response": messages[-1]["content"]}
+        return {"response": messages[-1]["content"], "context": augmenttions}
 
 
 class RetrieverPipeline(weave.Model):
