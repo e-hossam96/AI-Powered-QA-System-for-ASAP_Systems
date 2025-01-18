@@ -2,6 +2,7 @@ from pydantic_settings import BaseSettings
 
 
 class Settings(BaseSettings):
+    PROJECT_NAME: str
     MONGO_ADMIN_USER: str
     MONGO_ADMIN_PASS: str
     MONGODB_HOST: str
