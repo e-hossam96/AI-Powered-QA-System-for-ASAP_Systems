@@ -17,7 +17,7 @@ class ToolCallRAGPipeline(weave.Model):
     @weave.op()
     async def predict(
         self, query: str, chat_history: list[dict] | None = None, limit: int | None = 4
-    ) -> dict | None:
+    ) -> dict:
         prompt = self.generation_controller.process_prompt_text(
             query,
             self.app_settings.GENERATION_LLM_MAX_PROMPT_TOKENS,
@@ -36,7 +36,7 @@ class ToolCallRAGPipeline(weave.Model):
         )
 
         if ans is None:
-            return None
+            return {"response": None, "context": None}
 
         # handle function call responses
         while ans.choices[0].finish_reason == "tool_calls":
@@ -52,17 +52,17 @@ class ToolCallRAGPipeline(weave.Model):
                 )
                 vector = Vector(**args)
             else:
-                return None
+                return {"response": None, "context": None}
             # embed the text
             resp = await self.embedding_model.embed_text(
                 vector.text, self.app_settings.EMBEDDING_LLM_MODEL_NAME
             )
             vector.vector = resp.data[0].embedding if resp is not None else resp
             if vector.vector is None:
-                return None
+                return {"response": None, "context": None}
             augmenttions = await self.vectordb_model.search_by_vector(vector, limit)
             if len(augmenttions) == 0:
-                return None
+                return {"response": None, "context": None}
             augmenttions = [aug.text for aug in augmenttions]
             augmenttions = self.generation_controller.process_augmentations(
                 augmenttions
@@ -105,16 +105,16 @@ class RetrieverPipeline(weave.Model):
     app_settings: Settings
 
     @weave.op()
-    async def predict(self, query: str, limit: int | None = 4) -> dict | None:
+    async def predict(self, query: str, limit: int | None = 4) -> dict:
         vector = Vector(text=query)
         resp = await self.embedding_model.embed_text(
             vector.text, self.app_settings.EMBEDDING_LLM_MODEL_NAME
         )
         vector.vector = resp.data[0].embedding if resp is not None else resp
         if vector.vector is None:
-            return None
+            return {"context": None}
         results = await self.vectordb_model.search_by_vector(vector, limit)
         if len(results) == 0:
-            return None
+            return {"context": None}
         results[:] = [r.model_dump(exclude_none=True)["text"] for r in results]
         return {"context": results}
