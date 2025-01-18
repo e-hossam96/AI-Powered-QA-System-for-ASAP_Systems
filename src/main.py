@@ -59,7 +59,7 @@ def connect_evaluation_client(
     app: FastAPI,
     app_settinigs: Settings,
 ) -> FastAPI:
-    app.generation_client = AsyncOpenAI(
+    app.evaluation_client = AsyncOpenAI(
         api_key=app_settinigs.OPENAI_API_KEY,
         base_url=app_settinigs.EVAL_LLM_BASE_URL,
     )
@@ -100,6 +100,7 @@ async def connect_lifespan_clients(app: FastAPI):
     app.db_client = None
     app.vectordb_client = None
     app.generation_client = None
+    app.evaluation_client = None
     app.embedding_client = None
     app.tracer_client = None
 
