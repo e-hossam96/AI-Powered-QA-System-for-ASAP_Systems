@@ -212,23 +212,46 @@ We have implemented 7 `endpoints` that you can use. Only one of them, the `rag-q
          }'
   ```
 
+- Evaluation
+
+  To be used to call the `weave` evaluations and log the results into the project's dashboard on `weave`.
+
+  ```bash
+  curl -X GET http://localhost:8000/rag/evaluate
+  ```
+
+  The _demo_ evaluation result logs we provide can be access using the following `cURL` call. _Ensure you have a WANDB_API_KEY set in your environment_.
+
+  ```bash
+  curl 'https://trace.wandb.ai/calls/stream_query' \
+    -u api:$WANDB_API_KEY \
+    -H 'content-type: application/json' \
+    --data-raw '{
+      "project_id":"e_hossam96/ragbot",
+      "filter":{"op_names":["weave:///e_hossam96/ragbot/op/Evaluation.evaluate:*"],"trace_roots_only":false},
+      "limit":10000,
+      "offset":0,
+      "sort_by":[{"field":"started_at","direction":"desc"}],
+      "include_feedback": true
+    }'
+  ```
+
 Feel free to used the _lastest_ postman collection provided here, [postman-collection](./src/assets/asap.postman_collection.json), to quickly set the calls up.
 
 ## LLMops
 
 We have used **Weights & Biases**' `weave` to monitor the interactions with the backend LLMs (embedding and chat). Using `weave`, we can directly add feedbacks to the LLMs calls using _thumbs-up_ 👍 and _thumbs-down_ 👎 emojis and notes. This helpful in case we needed to collect fine-tuning data to further inhance our application. User feedbacks can also be integrated using the same options with just slight modification to the frontend code and a dedicated endpoint to collect the feedbacks. We believe this can be easily added later.
 
-The followings are screenshots of the dashboard of the application's project on **Weights & Biases**. It is also public here: [asap-qa-i](https://wandb.ai/e_hossam96/asap-ai-qa/weave).
+The dashboard link of the application's project on **Weights & Biases** can accessed from [Dashboard](https://wandb.ai/e_hossam96/ragbot/weave).
 
-![Ops](./weave-ops.png)
+## Notes
 
-![Ops with Latency](./weave-ops-with-latency.png)
+The following **Wikipedia** pages were used as our knowledge base.
 
-![Sample Op](./weave-sample-op.png)
-
-![Sample Op Tool Call](./weave-sample-op-tool-call.png)
-
-![Sample Op Response](./weave-sample-op-response.png)
+- [World War II](https://en.wikipedia.org/wiki/World_War_II)
+- [History of Artificial Intelligence](https://en.wikipedia.org/wiki/History_of_artificial_intelligence)
+- [Ancient Egypt](https://en.wikipedia.org/wiki/Ancient_Egypt)
+- [Roman Empire](https://en.wikipedia.org/wiki/Roman_Empire)
 
 ## License
 
