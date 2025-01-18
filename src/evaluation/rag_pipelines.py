@@ -2,9 +2,24 @@ import json
 import weave
 from configs import OpenAIRoleConfig
 from controllers import OpenAILLMController
-from helpers.settings_config import Settings
 from models import OpenAILLMModel, QdrantVectorModel
 from models.data_schemas import Vector
+from dataclasses import dataclass
+
+
+@dataclass
+class RAGSettings:
+    GENERATION_LLM_BASE_URL: str
+    GENERATION_LLM_MODEL_NAME: str
+    GENERATION_LLM_SPECIAL_TOKENS: list[str]
+    GENERATION_LLM_MAX_PROMPT_TOKENS: int
+    GENERATION_LLM_MAX_OUTPUT_TOKENS: int
+    GENERATION_LLM_TEMPERATURE: float
+    EMBEDDING_LLM_BASE_URL: str
+    EMBEDDING_LLM_MODEL_NAME: str
+    EMBEDDING_LLM_SPECIAL_TOKENS: list[str]
+    EMBEDDING_LLM_EMBEDDING_SIZE: int
+    EMBEDDING_LLM_MAX_PROMPT_TOKENS: int
 
 
 class ToolCallRAGPipeline(weave.Model):
@@ -12,7 +27,7 @@ class ToolCallRAGPipeline(weave.Model):
     embedding_model: OpenAILLMModel
     generation_model: OpenAILLMModel
     generation_controller: OpenAILLMController
-    app_settings: Settings
+    rag_settings: RAGSettings
 
     @weave.op()
     async def predict(
@@ -20,18 +35,18 @@ class ToolCallRAGPipeline(weave.Model):
     ) -> dict:
         prompt = self.generation_controller.process_prompt_text(
             query,
-            self.app_settings.GENERATION_LLM_MAX_PROMPT_TOKENS,
-            self.app_settings.GENERATION_LLM_SPECIAL_TOKENS,
+            self.rag_settings.GENERATION_LLM_MAX_PROMPT_TOKENS,
+            self.rag_settings.GENERATION_LLM_SPECIAL_TOKENS,
         )
         messages = self.generation_controller.construct_user_query(
             prompt=prompt,
             chat_history=chat_history,
         )
         ans = await self.generation_model.generate_text(
-            model_name=self.app_settings.GENERATION_LLM_MODEL_NAME,
+            model_name=self.rag_settings.GENERATION_LLM_MODEL_NAME,
             messages=messages,
-            max_output_tokens=self.app_settings.GENERATION_LLM_MAX_OUTPUT_TOKENS,
-            temperature=self.app_settings.GENERATION_LLM_TEMPERATURE,
+            max_output_tokens=self.rag_settings.GENERATION_LLM_MAX_OUTPUT_TOKENS,
+            temperature=self.rag_settings.GENERATION_LLM_TEMPERATURE,
             tools=self.generation_controller.get_tools(),
         )
 
@@ -47,15 +62,15 @@ class ToolCallRAGPipeline(weave.Model):
             if "text" in args and tool_name == "search_knowledge_base":
                 args["text"] = self.generation_controller.process_prompt_text(
                     prompt_text=query,
-                    max_tokens=self.app_settings.EMBEDDING_LLM_MAX_PROMPT_TOKENS,
-                    special_tokens=self.app_settings.EMBEDDING_LLM_SPECIAL_TOKENS,
+                    max_tokens=self.rag_settings.EMBEDDING_LLM_MAX_PROMPT_TOKENS,
+                    special_tokens=self.rag_settings.EMBEDDING_LLM_SPECIAL_TOKENS,
                 )
                 vector = Vector(**args)
             else:
                 return {"response": None, "context": None}
             # embed the text
             resp = await self.embedding_model.embed_text(
-                vector.text, self.app_settings.EMBEDDING_LLM_MODEL_NAME
+                vector.text, self.rag_settings.EMBEDDING_LLM_MODEL_NAME
             )
             vector.vector = resp.data[0].embedding if resp is not None else resp
             if vector.vector is None:
@@ -81,10 +96,10 @@ class ToolCallRAGPipeline(weave.Model):
             tool_messsage = ans.choices[0].message.to_dict()
             messages.extend([tool_messsage, tool_call_result_message])
             ans = await self.generation_model.generate_text(
-                model_name=self.app_settings.GENERATION_LLM_MODEL_NAME,
+                model_name=self.rag_settings.GENERATION_LLM_MODEL_NAME,
                 messages=messages,
-                max_output_tokens=self.app_settings.GENERATION_LLM_MAX_OUTPUT_TOKENS,
-                temperature=self.app_settings.GENERATION_LLM_TEMPERATURE,
+                max_output_tokens=self.rag_settings.GENERATION_LLM_MAX_OUTPUT_TOKENS,
+                temperature=self.rag_settings.GENERATION_LLM_TEMPERATURE,
                 tools=self.generation_controller.get_tools(),
             )
 
@@ -102,13 +117,13 @@ class ToolCallRAGPipeline(weave.Model):
 class RetrieverPipeline(weave.Model):
     vectordb_model: QdrantVectorModel
     embedding_model: OpenAILLMModel
-    app_settings: Settings
+    rag_settings: RAGSettings
 
     @weave.op()
     async def predict(self, query: str, limit: int | None = 4) -> dict:
         vector = Vector(text=query)
         resp = await self.embedding_model.embed_text(
-            vector.text, self.app_settings.EMBEDDING_LLM_MODEL_NAME
+            vector.text, self.rag_settings.EMBEDDING_LLM_MODEL_NAME
         )
         vector.vector = resp.data[0].embedding if resp is not None else resp
         if vector.vector is None:
