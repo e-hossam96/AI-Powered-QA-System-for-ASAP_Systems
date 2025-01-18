@@ -1,6 +1,6 @@
-# AI-Powered-QA-System-for-ASAP_Systems
+# RAGBOT
 
-AI Powered Question Answering System using LLMs. This is a take home task implementation for **ASAP Systems** that features simple RAG to answer user queries about specific topics. The system is a straight forward _conversation-memory-conservative_ application. `Hired`.
+Generic RAG Application with Databases Integrations and LLM-Guided Evaluations.
 
 ## Design Description
 
@@ -99,10 +99,10 @@ At any point if you would like to update the codes and test them, you can create
   source ./miniconda/bin/activate
   ```
 
-- Create the **asap** environment.
+- Create the **ragbot** environment.
 
   ```bash
-  conda create -n asap python=3.11.9
+  conda create -n ragbot python=3.11.9
   ```
 
 - Intall the `pip` dependencies.
