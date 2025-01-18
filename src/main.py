@@ -11,6 +11,7 @@ from routes.base import base_router
 from routes.data import data_router
 from routes.index import index_router
 from routes.rag import rag_router
+from routes.eval import eval_router
 from configs import VectorDBProviderConfig
 from contextlib import asynccontextmanager
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -54,6 +55,17 @@ def connect_generation_client(
     return app
 
 
+def connect_evaluation_client(
+    app: FastAPI,
+    app_settinigs: Settings,
+) -> FastAPI:
+    app.generation_client = AsyncOpenAI(
+        api_key=app_settinigs.OPENAI_API_KEY,
+        base_url=app_settinigs.EVAL_LLM_BASE_URL,
+    )
+    return app
+
+
 def connect_embedding_client(
     app: FastAPI,
     app_settinigs: Settings,
@@ -82,6 +94,7 @@ async def connect_lifespan_clients(app: FastAPI):
     app = connect_generation_client(app, settings)
     app = connect_embedding_client(app, settings)
     app = connect_tracer_client(app, settings)
+    app = connect_evaluation_client(app, settings)
     yield
     app.db_connection.close()
     app.db_client = None
@@ -96,3 +109,4 @@ app.include_router(base_router)
 app.include_router(data_router)
 app.include_router(index_router)
 app.include_router(rag_router)
+app.include_router(eval_router)
