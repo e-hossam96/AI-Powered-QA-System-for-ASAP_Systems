@@ -69,7 +69,7 @@ async def evaluate(request: Request) -> JSONResponse:
     )
     eval_dataset = read_eval_data(Path(eval_settings.EVAL_DATA_PATH))
 
-    async def scorer(query, output):
+    async def completeness_scorer(query, output):
         return await score_completeness(
             query,
             output["response"],
@@ -83,7 +83,7 @@ async def evaluate(request: Request) -> JSONResponse:
         name="Completeness-Evaluation",
         description="Evaluate completeness of LLM's generated answers compared to user query.",
         dataset=eval_dataset,
-        scorers=[scorer],
+        scorers=[completeness_scorer],
     )
     try:
         scores = await completeness_evaluator.evaluate(rag_pipeline)
